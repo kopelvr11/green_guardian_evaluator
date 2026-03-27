@@ -30,7 +30,35 @@ export default function DashboardPage() {
         setFilterCategory('All');
         setFilterStatus('All');
     };
+  }, [bids]);
 
+  // 🔹 Compute status
+  const bidsWithStatus: Bid[] = useMemo(() => {
+    return bids.map((b) => {
+      const status: BidStatus = evalMap[b.id] ? "Completed" : "Pending";
+      return { ...b, status };
+    });
+  }, [bids, evalMap]);
+
+  const total = bidsWithStatus.length;
+  const pending = bidsWithStatus.filter((b) => b.status === "Pending").length;
+  const completed = bidsWithStatus.filter((b) => b.status === "Completed").length;
+
+  const filteredBids = bidsWithStatus.filter((bid) => {
+    const matchCategory =
+      filterCategory === "All" || bid.category === filterCategory;
+    const matchStatus =
+      filterStatus === "All" || bid.status === filterStatus;
+    return matchCategory && matchStatus;
+  });
+
+  const clearFilters = () => {
+    setFilterCategory("All");
+    setFilterStatus("All");
+  };
+
+  // 🔹 Loading state
+  if (loading) {
     return (
         <div className="relative min-h-screen overflow-hidden">
             <div className="absolute inset-0 z-0">
@@ -43,43 +71,53 @@ export default function DashboardPage() {
                 />
             </div>
 
-            <div className="absolute inset-0 z-10 bg-[#e5ebe6]/90" />
-
-            <div className="pointer-events-none absolute right-0 top-32 z-10 hidden lg:block">
-                <div className="relative h-[60vh] max-h-[520px] w-[28vw] max-w-[380px]">
-                    <Image
-                        src="/logos/Trophy.png"
-                        alt="Green Guardian Trophy"
-                        fill
-                        priority
-                        className="object-contain drop-shadow-[0_18px_40px_rgba(10,39,36,0.22)]"
-                    />
+            {/* Filters */}
+            {isFilterOpen && (
+              <div className="mb-6 grid grid-cols-1 gap-4 rounded-xl border border-gray-100 bg-gray-50 p-4 md:grid-cols-3">
+                {/* Category filter */}
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold uppercase tracking-wider text-gray-500">
+                    Category
+                  </label>
+                  <select
+                    value={filterCategory}
+                    onChange={(e) => setFilterCategory(e.target.value)}
+                    className="w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
+                  >
+                    <option value="All">All Categories</option>
+                    <option value="MSMEs / Large Corporations">
+                      MSMEs / Large Corporations
+                    </option>
+                    <option value="Local Government Units (LGUs)">
+                      Local Government Units (LGUs)
+                    </option>
+                  </select>
                 </div>
-            </div>
+
+                {/* Status filter */}
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold uppercase tracking-wider text-gray-500">
+                    Status
+                  </label>
+                  <select
+                    value={filterStatus}
+                    onChange={(e) => setFilterStatus(e.target.value)}
+                    className="w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
+                  >
+                    <option value="All">All Statuses</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Completed">Completed</option>
+                  </select>
+                </div>
 
             <div className="relative z-20">
                 <DashboardHeader />
 
                 <main className="mx-auto max-w-6xl p-6">
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-                        <StatCard
-                            title="Total Assigned"
-                            value={total}
-                            icon={<FileText />}
-                            color="text-indigo-500"
-                        />
-                        <StatCard
-                            title="Pending"
-                            value={pending}
-                            icon={<Clock />}
-                            color="text-yellow-500"
-                        />
-                        <StatCard
-                            title="Completed"
-                            value={completed}
-                            icon={<CheckCircle />}
-                            color="text-green-500"
-                        />
+                        <StatCard title="Total Assigned" value={total} icon={<FileText />} color="text-indigo-500" />
+                        <StatCard title="Pending" value={pending} icon={<Clock />} color="text-yellow-500" />
+                        <StatCard title="Completed" value={completed} icon={<CheckCircle />} color="text-green-500" />
                     </div>
 
                     <section className="mt-10 rounded-2xl bg-white p-6 shadow-md transition-all duration-300">

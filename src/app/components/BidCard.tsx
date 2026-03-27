@@ -1,3 +1,9 @@
+// summary card for single bid assigned to an evaluator
+// note: keyvisual and elements are not yet displayed here
+
+
+'use client';
+
 import Image from 'next/image';
 import { Clock, CheckCircle, ChevronRight } from 'lucide-react';
 import { Bid } from '@/app/data/mockBids';
